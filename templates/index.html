@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard Tingkat Literasi di Jawa Barat</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        .hero {
+            text-align: center;
+            padding: 50px 0;
+            background: #007bff;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .tableauPlaceholder {
+            width: 100%;
+            height: 80vh;
+            min-height: 600px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .tableauViz {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 600px;
+        }
+        #scatterPlot, .plotly-embed {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container text-center">
+            <a class="navbar-brand mx-auto" href="#">Dashboard Tingkat Literasi di Jawa Barat</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class='tableauPlaceholder' id='viz1737989995322'>
+            <noscript>
+                <a href='#'><img alt='Dashboard 1' src='https://public.tableau.com/static/images/pr/project_17385103843730/Dashboard1/1_rss.png' style='border: none' /></a>
+            </noscript>
+            <object class='tableauViz' style='width:100%; height:100%;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                <param name='embed_code_version' value='3' />
+                <param name='site_root' value='' />
+                <param name='name' value='project_17385103843730/Dashboard1' />
+                <param name='tabs' value='no' />
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https://public.tableau.com/static/images/pr/project_17385103843730/Dashboard1/1.png' />
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en-US' />
+            </object>
+        </div>
+        
+        <script type='text/javascript'>
+            var divElement = document.getElementById('viz1737989995322');
+            var vizElement = divElement.getElementsByTagName('object')[0];
+            
+            // Mengatur lebar minimum menjadi 1300px dan tinggi tetap 100vh, dengan minHeight 1600px
+            vizElement.style.width = '100%';  // Lebar mengikuti 100% lebar kontainer
+            vizElement.style.minWidth = '1200px';  // Menetapkan lebar minimum 1300px
+            vizElement.style.height = '100vh';  // Tinggi mengikuti tinggi layar
+            vizElement.style.minHeight = '1550px';  // Minimum tinggi 1600px
+            vizElement.style.overflow = 'hidden';
+        
+            var scriptElement = document.createElement('script');
+            scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+            vizElement.parentNode.insertBefore(scriptElement, vizElement);
+        </script>
+        
+
+        <div id="scatterPlot"></div>
+        <div class="plotly-embed">
+            {{ plot_html|safe }}
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
