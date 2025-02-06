@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objs as go
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+import streamlit.components.v1 as components
 
 # Membaca data dari file Excel
 @st.cache_data
@@ -69,3 +70,9 @@ st.title("3D KMeans Clustering with Plotly & Streamlit")
 
 # Tampilkan scatterplot 3D
 st.plotly_chart(process_data())
+
+# Menambahkan iframe Tableau
+iframe_code = '''
+<iframe src="https://public.tableau.com/views/project_17385103843730/Dashboard1" width="100%" height="800px" frameborder="0"></iframe>
+'''
+components.html(iframe_code, height=800)
