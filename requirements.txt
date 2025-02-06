@@ -1,5 +1,8 @@
 streamlit
 pandas
-scikit-learn
 plotly
-openpyxl
+scikit-learn
+folium
+streamlit-folium
+geopandas
+python-dotenv
