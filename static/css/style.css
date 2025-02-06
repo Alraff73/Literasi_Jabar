@@ -1,73 +1,29 @@
-/* Mengatur body dan font secara umum */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Mengatur warna dan alignment judul */
-h1 {
-    text-align: center;
-    font-size: 2.5em;
-    color: #333;
-    margin-top: 20px;
-    margin-bottom: 30px;
-}
-
-/* Mengatur container utama */
-.container {
-    width: 100%;
-    padding: 20px;
-    margin: 0 auto;
-}
-
-/* Menyempurnakan tampilan embed Tableau */
-.tableauPlaceholder {
-    position: relative;
-    width: 100%;
-    margin-bottom: 20px; /* Mengurangi jarak antara Tableau dan scatter plot */
-}
-
-/* Mengatur ukuran dan menambah border pada embed Tableau */
-.tableauViz {
-    width: 100%;
-    height: 800px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Mengatur tampilan Plotly 3D Scatter Plot */
-#scatterPlot {
-    width: 100%;
-    height: auto;
-    margin-bottom: 20px; /* Mengurangi jarak antar elemen */
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Menambahkan padding pada embed Plotly */
-.plotly-embed {
-    margin-top: 20px; /* Mengurangi jarak antara plotly dan konten lain */
-}
-
-/* Style tambahan untuk link atau button */
-a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Untuk memperbaiki margin dan padding agar lebih konsisten */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+#tableauVizContainer {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    height: 800px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
