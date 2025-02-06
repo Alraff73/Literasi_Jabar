@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objs as go
+import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
@@ -62,16 +63,51 @@ def process_data():
     )
 
     fig = go.Figure(data=data_plotly, layout=layout)
-    return fig
+    return data, fig
 
 # Tampilan Streamlit
 st.title("3D KMeans Clustering with Plotly & Streamlit")
 
-# Tampilkan scatterplot 3D
-st.plotly_chart(process_data())
+# Load data dan tampilkan scatterplot 3D
+data, fig = process_data()
+st.plotly_chart(fig)
 
-# Menambahkan iframe Tableau menggunakan markdown
-st.markdown("""
-    <iframe src="https://public.tableau.com/app/profile/nita.sawalia/viz/project_17385103843730/Dashboard1" 
-            width="100%" height="800px" frameborder="0"></iframe>
-""", unsafe_allow_html=True)
+# Big Numbers untuk Insight
+st.header("Summary Data")
+col1, col2, col3, col4 = st.columns([1, 1, 1, 1], gap="large")
+with col1:
+    st.metric("Total Wilayah", f"{data['nama_kabupaten_kota'].nunique()} Kabupaten/Kota")
+with col2:
+    st.metric("Rata-Rata Indeks Literasi", f"{data['indeks_pembangunan_literasi_masyarakat'].mean():.2f}")
+with col3:
+    st.metric("Rata-Rata Indeks Pendidikan", f"{data['indeks_pendidikan'].mean():.2f}")
+with col4:
+    st.metric("Rata-Rata Indeks Digital", f"{data['indeks_masyarakat_digital_indonesia'].mean():.2f}")
+
+# Visualisasi Persebaran Kota (Map Scatter Plot)
+st.header("Persebaran Kabupaten/Kota Berdasarkan Kluster")
+fig_map = px.scatter_mapbox(
+    data, lat="latitude", lon="longitude", color="Cluster", hover_name="nama_kabupaten_kota",
+    zoom=7, mapbox_style="carto-positron",
+    title="Persebaran Kabupaten/Kota Berdasarkan Cluster"
+)
+st.plotly_chart(fig_map)
+
+# Bar Chart Jumlah Kabupaten/Kota per Kluster
+st.header("Jumlah Kabupaten/Kota pada Tiap Kluster")
+cluster_counts = data['Cluster'].value_counts().reset_index()
+cluster_counts.columns = ['Cluster', 'Jumlah']
+bar_chart = px.bar(
+    cluster_counts, x='Cluster', y='Jumlah',
+    title="Jumlah Kabupaten/Kota per Kluster",
+    color='Cluster'
+)
+st.plotly_chart(bar_chart)
+
+# Pie Chart Persentase per Kluster
+st.header("Persentase Kabupaten/Kota per Kluster")
+pie_chart = px.pie(
+    cluster_counts, values='Jumlah', names='Cluster',
+    title="Persentase Kabupaten/Kota per Kluster"
+)
+st.plotly_chart(pie_chart)
