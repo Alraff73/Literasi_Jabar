@@ -72,6 +72,6 @@ st.plotly_chart(process_data())
 
 # Menambahkan iframe Tableau menggunakan markdown
 st.markdown("""
-    <iframe src="https://public.tableau.com/views/project_17385103843730/Dashboard1" 
+    <iframe src="https://public.tableau.com/app/profile/nita.sawalia/viz/project_17385103843730/Dashboard1" 
             width="100%" height="800px" frameborder="0"></iframe>
 """, unsafe_allow_html=True)
