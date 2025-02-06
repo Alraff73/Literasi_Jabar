@@ -7,46 +7,60 @@ from streamlit_folium import st_folium
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import geopandas as gpd
+from shapely.geometry import Point
 
-# Load dataset dan geojson
+# Fungsi untuk load dataset
 @st.cache_data
 def load_data():
     data = pd.read_excel("dataset_project2_new.xlsx")
     return data.dropna()
 
+# Fungsi untuk load geojson
 @st.cache_data
 def load_geojson():
-    return gpd.read_file("ADMINISTRASI_KABKOT_AR_BPS.geojson")
+    geojson_data = gpd.read_file("kota.geojson")
 
-# Clustering function
+    # Pastikan kolom geometry memiliki data centroid
+    geojson_data['geometry'] = geojson_data['geometry'].apply(lambda x: x.centroid if not isinstance(x, Point) else x)
+
+    # Ekstraksi latitude dan longitude
+    geojson_data['latitude'] = geojson_data.geometry.y
+    geojson_data['longitude'] = geojson_data.geometry.x
+    return geojson_data
+
+# Fungsi clustering
 def cluster_data(data):
     X = data[['indeks_pembangunan_literasi_masyarakat', 'indeks_pendidikan', 'indeks_masyarakat_digital_indonesia']]
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    kmeans = KMeans(n_clusters=3, random_state=0, n_init=10)
+    kmeans = KMeans(n_clusters=3, random_state=0)
     data['Cluster'] = kmeans.fit_predict(X_scaled)
 
-    # Mapping cluster ke kategori berdasarkan indeks literasi
+    # Mapping kategori berdasarkan urutan nilai centroid
     centroids = kmeans.cluster_centers_
-    sorted_indices = centroids[:, 0].argsort()  # Urutkan berdasarkan indeks literasi
+    sorted_indices = centroids[:, 0].argsort()
     cluster_map = {sorted_indices[0]: 'Rendah', sorted_indices[1]: 'Sedang', sorted_indices[2]: 'Tinggi'}
-    
-    # Terapkan mapping kategori yang benar
     data['Kategori'] = data['Cluster'].map(cluster_map)
-
+    remap_cluster = {0: 1, 1: 2, 2: 0}
+    data['Cluster'] = data['Cluster'].map(remap_cluster)
     return data, kmeans, scaler
 
 # Load data
 st.title("Visualisasi K-Means Clustering dengan Persebaran Kota di Jawa Barat")
 data = load_data()
 geojson_data = load_geojson()
+
+# Gabungkan data utama dengan geojson
+data = pd.merge(data, geojson_data[['bps_nama', 'latitude', 'longitude']], 
+                 left_on='bps_nama', right_on='bps_nama', how='left')
+
 data, kmeans, scaler = cluster_data(data)
 
 # Visualisasi Big Numbers
 st.subheader("Ringkasan Data")
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Wilayah", f"{data['nama_kabupaten_kota'].nunique()}")
+col1.metric("Total Wilayah", f"{data['bps_nama'].nunique()}")
 col2.metric("Rata-Rata Literasi", f"{data['indeks_pembangunan_literasi_masyarakat'].mean():.2f}")
 col3.metric("Rata-Rata Pendidikan", f"{data['indeks_pendidikan'].mean():.2f}")
 col4.metric("Rata-Rata Digital", f"{data['indeks_masyarakat_digital_indonesia'].mean():.2f}")
@@ -59,13 +73,10 @@ data_plot_trace = go.Scatter3d(
     mode='markers',
     marker=dict(color=data['Cluster'], colorscale='Viridis', size=5),
     name='Data Points',
-    hovertext=data.apply(
-        lambda row: f"Kabupaten/Kota: {row['nama_kabupaten_kota']}<br>Kategori: {row['Kategori']}", axis=1
-    ),
+    hovertext=data.apply(lambda row: f"Kabupaten/Kota: {row['bps_nama']}<br>Kategori: {row['Kategori']}", axis=1),
     hoverinfo='x+y+z+text'
 )
 
-# Denormalisasi centroid untuk skala asli
 centroids_denormalized = scaler.inverse_transform(kmeans.cluster_centers_)
 centroid_trace = go.Scatter3d(
     x=centroids_denormalized[:, 0],
@@ -74,11 +85,10 @@ centroid_trace = go.Scatter3d(
     mode='markers+text',
     marker=dict(color='black', size=10, symbol='diamond'),
     name='Centroids',
-    text=['Rendah', 'Sedang', 'Tinggi'],
+    text=['Sedang', 'Tinggi', 'Rendah'],
     textposition='top center'
 )
 
-# Gabungkan plot data dan centroid
 fig_3d = go.Figure(data=[data_plot_trace, centroid_trace])
 fig_3d.update_layout(
     title='3D KMeans Clustering dengan Centroid',
@@ -95,10 +105,10 @@ st.subheader("Persebaran Klaster Kota/Kabupaten Jawa Barat")
 m = folium.Map(location=[-6.9, 107.6], zoom_start=8)
 marker_cluster = MarkerCluster().add_to(m)
 
-for _, row in data.iterrows():
+for _, row in data.dropna(subset=['latitude', 'longitude']).iterrows():
     folium.Marker(
         location=[row['latitude'], row['longitude']],
-        popup=(f"<b>{row['nama_kabupaten_kota']}</b><br>Kategori: {row['Kategori']}"),
+        popup=(f"<b>{row['bps_nama']}</b><br>Kategori: {row['Kategori']}"),
         icon=folium.Icon(color='blue' if row['Kategori'] == 'Tinggi' else 'green' if row['Kategori'] == 'Sedang' else 'red')
     ).add_to(marker_cluster)
 
@@ -107,20 +117,20 @@ st_data = st_folium(m, width=700)
 # Visualisasi Bar dan Pie Chart
 import plotly.express as px
 
-cluster_counts = data.groupby('Kategori')['nama_kabupaten_kota'].count().reset_index()
+cluster_counts = data.groupby('Cluster')['bps_nama'].count().reset_index()
 fig_bar = px.bar(
     cluster_counts, 
-    x='Kategori', 
-    y='nama_kabupaten_kota', 
-    title='Jumlah Kabupaten/Kota per Kategori', 
-    labels={'Kategori': 'Kategori', 'nama_kabupaten_kota': 'Jumlah Kabupaten/Kota'}
+    x='Cluster', 
+    y='bps_nama', 
+    title='Jumlah Kabupaten/Kota per Cluster', 
+    labels={'Cluster': 'Cluster', 'bps_nama': 'Jumlah Kabupaten/Kota'}
 )
 st.plotly_chart(fig_bar)
 
 fig_pie = px.pie(
     cluster_counts, 
-    values='nama_kabupaten_kota', 
-    names='Kategori', 
-    title='Persentase Kabupaten/Kota per Kategori'
+    values='bps_nama', 
+    names='Cluster', 
+    title='Persentase Kabupaten/Kota per Cluster'
 )
 st.plotly_chart(fig_pie)
