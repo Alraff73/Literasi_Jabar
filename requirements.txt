@@ -6,3 +6,4 @@ folium
 streamlit-folium
 geopandas
 python-dotenv
+openpyxl
