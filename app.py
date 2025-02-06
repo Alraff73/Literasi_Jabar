@@ -1,16 +1,18 @@
+import streamlit as st
 import pandas as pd
+import plotly.graph_objs as go
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-from flask import Flask, render_template
-import plotly.graph_objs as go
 
-app = Flask(__name__)
+# Membaca data dari file Excel
+@st.cache_data
+def load_data():
+    data = pd.read_excel("dataset_project2_new.xlsx")
+    return data.dropna()  # Hapus nilai NaN jika ada
 
 # Fungsi untuk memproses data dan membuat visualisasi
 def process_data():
-    # Membaca data dari file Excel
-    data = pd.read_excel("dataset_project2_new.xlsx")
-    data = data.dropna()  # Menghapus nilai NaN jika ada
+    data = load_data()
 
     # Menyiapkan data untuk clustering
     X = data[['indeks_pembangunan_literasi_masyarakat', 'indeks_pendidikan', 'indeks_masyarakat_digital_indonesia']]
@@ -18,7 +20,7 @@ def process_data():
     X_scaled = scaler.fit_transform(X)
 
     # Menjalankan KMeans clustering
-    kmeans = KMeans(n_clusters=3, random_state=0)
+    kmeans = KMeans(n_clusters=3, random_state=0, n_init=10)
     data['Cluster'] = kmeans.fit_predict(X_scaled)
 
     # Mendapatkan centroid
@@ -60,15 +62,10 @@ def process_data():
     )
 
     fig = go.Figure(data=data_plotly, layout=layout)
+    return fig
 
-    # Konversi visualisasi Plotly ke HTML
-    plot_html = fig.to_html(full_html=False)
-    return plot_html
+# Tampilan Streamlit
+st.title("3D KMeans Clustering with Plotly & Streamlit")
 
-@app.route('/')
-def index():
-    plot_html = process_data()  # Proses data dan buat plot
-    return render_template('index.html', plot_html=plot_html)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# Tampilkan scatterplot 3D
+st.plotly_chart(process_data())
